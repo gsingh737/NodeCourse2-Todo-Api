@@ -5,6 +5,9 @@ mongoose.Promise = global.Promise;
 
 //no need for callbacks here as mongoose manages it for us any query to db after this line will not be executed behind the scenes unless connection is succesful
 //next line will be exectuted but not the query itself
-mongoose.connect( process.env.MONGODB_URI || 'mongodb://localhost:27017/TodoApp');
+mongoose.connect( process.env.MONGODB_URI);
 
 module.exports = { mongoose };
+
+//Heroku sets this variable
+//process.env.NODE_ENV === "production"

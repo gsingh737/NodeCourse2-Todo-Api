@@ -11,7 +11,9 @@ const todos = [{
 },
 {
   _id: new ObjectID(),
-  text: 'Second test todo'
+  text: 'Second test todo',
+  completed: true,
+  completedAt: 333
 }];
 
 beforeEach((done) => {
@@ -142,3 +144,48 @@ it('should remove a 404 if object id is invalid', (done) => {
 });
 
 });
+
+
+describe('PATCH /todos/:id', () => {
+    it('should update the todo', (done) => {
+        request(app)
+        .patch(`/todos/${todos[0]._id.toHexString()}`)
+        .send({
+            text : "Updated text",
+            completed: true
+          })
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.todo.completed).toBe(true);
+          expect(res.body.todo.text).toBe("Updated text");
+        })
+        .end((err, res) => {
+          if(err){
+            return done(err);
+          }
+          done();
+        });
+  });
+
+  it('should clear completedAt when todo is not completed', (done) => {
+    request(app)
+    .patch(`/todos/${todos[1]._id.toHexString()}`)
+    .send({
+        text : "Updated text2",
+        completed: false
+      })
+    .expect(200)
+    .expect((res) => {
+      expect(res.body.todo.completed).toBe(false);
+      expect(res.body.todo.text).toBe("Updated text2");
+      expect(res.body.todo.completedAt).toNotExist();
+    })
+    .end((err, res) => {
+      if(err){
+        return done(err);
+      }
+      done();
+    });
+
+  });
+  });

@@ -7,6 +7,10 @@ const _ = require('lodash');
 var {mongoose} = require('./db/mongoose');
 var {Todo} = require('./models/todo');
 var {User} = require('./models/user');
+var {authenticate} = require('./middleware/authenticate');
+
+
+
 var PORT = process.env.PORT;
 var app = express();
 app.use(bodyParser.json());
@@ -21,6 +25,12 @@ app.post('/todos', (req, res) => {
     res.status(400).send(e);
   });
 });
+
+app.get('/users/me', authenticate,  (req, res) => {
+  //you will not even be here if user wasnt found as on catch e we are not calling next in middleware authenticate
+  res.send(req.user);
+});
+
 
 app.get('/todos', (req, res) => {
    Todo.find().then((todos) => {
@@ -92,7 +102,7 @@ app.post('/users', (req, res) => {
       var user = new User(body);
 
       user.save().then(()=>{
-        return user.generateAuthToken();
+        return user.generateAuthToken();   //Rememver this fuction is returning a then i.e success
         //res.send(user)
       }).then((token) => {
         res.header('x-auth', token).send(user);

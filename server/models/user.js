@@ -55,6 +55,27 @@ UserSchema.methods.generateAuthToken = function () {
     return token;
   });
 };
+
+UserSchema.statics.findbyCredential = function (email, password) {
+  var User = this;
+  return User.findOne({email}).then((user) => {
+    if(!user){
+      return Promise.reject();
+    }
+    return new Promise ((resolve, reject) => {
+      //User bcrypt
+      if(bcrypt.compare(password, user.password, (error, result) => {
+          if(result) {
+            resolve(user);
+          }
+          else {
+              reject();
+          }
+      }));
+    });
+  });
+};
+
 //UserSchema.mehtods for model(USER) binding this
 UserSchema.statics.findByToken = function (token) {
   var User = this; //THis here is a model not instance user like above function

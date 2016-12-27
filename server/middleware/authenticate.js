@@ -4,7 +4,6 @@ var authenticate = (req, res, next) => {
   var token = req.header('x-auth');
   User.findByToken(token).then((user) => {
     if(!user){
-      console.log('Testing wrong path');
         return Promise.reject();
     }
     req.user = user;

@@ -15,23 +15,25 @@ var PORT = process.env.PORT;
 var app = express();
 app.use(bodyParser.json());
 
-app.post('/todos', (req, res) => {
-  var todo = new Todo({
-    text: req.body.text
-  });
-  todo.save().then((doc) => {
-    res.send(doc);
-  }, (e) => {
-    res.status(400).send(e);
-  });
+//POST USER
+app.post('/users', (req, res) => {
+      var body = _.pick(req.body, ['email', 'password']);
+      var user = new User(body);
+
+      user.save().then(()=>{
+        return user.generateAuthToken();   //Rememver this fuction is returning a then i.e success
+        //res.send(user)
+      }).then((token) => {
+        res.header('x-auth', token).send(user);
+      }).catch((err)=> {
+        res.status(400).send();
+      });
 });
 
 app.get('/users/me', authenticate,  (req, res) => {
   //you will not even be here if user wasnt found as on catch e we are not calling next in middleware authenticate
   res.send(req.user);
 });
-
-//POST /users/log/ {email, password}
 
 app.post('/users/login', (req, res) => {
     var body = _.pick(req.body, ['email', 'password']);
@@ -43,9 +45,19 @@ app.post('/users/login', (req, res) => {
     }).catch((e) => {
       res.status(400).send();
     });
+  });
 
+  app.post('/todos', (req, res) => {
+    var todo = new Todo({
+      text: req.body.text
+    });
+    todo.save().then((doc) => {
+      res.send(doc);
+    }, (e) => {
+      res.status(400).send(e);
+    });
+  });
 
-  })
 app.get('/todos', (req, res) => {
    Todo.find().then((todos) => {
      res.send({todos});
@@ -110,20 +122,7 @@ app.patch('/todos/:id', (req, res) => {
    });
 });
 
-//POST USER
-app.post('/users', (req, res) => {
-      var body = _.pick(req.body, ['email', 'password']);
-      var user = new User(body);
 
-      user.save().then(()=>{
-        return user.generateAuthToken();   //Rememver this fuction is returning a then i.e success
-        //res.send(user)
-      }).then((token) => {
-        res.header('x-auth', token).send(user);
-      }).catch((err)=> {
-        res.status(400).send();
-      });
-});
 
 
 app.listen(PORT, () => {
